@@ -1,0 +1,113 @@
+/* Mesmos tokens e proporcoes da tela de login do DadosPinda. */
+* { box-sizing: border-box; }
+html { min-height: 100%; color-scheme: light; }
+html body.pinda-login {
+  margin: 0;
+  min-height: 100vh;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-background-page);
+  color: var(--color-text-dark);
+  font-family: var(--font-family-sans);
+  font-size: 16px;
+  line-height: 1.6;
+}
+.pinda-login .container { width: min(1120px, calc(100% - 48px)); margin-inline: auto; }
+.institutional-header { background: var(--color-surface); border-bottom: 1px solid var(--color-border-light); }
+.institutional-ribbon { background: var(--color-brand); color: var(--color-on-brand); font-size: .75rem; }
+.institutional-ribbon > div { display: flex; justify-content: space-between; gap: 16px; padding-block: 7px; }
+.header-content { display: flex; justify-content: space-between; align-items: center; gap: 24px; padding-block: 4px; font-size: .875rem; }
+.institutional-logo { display: block; width: 280px; height: 118px; object-fit: contain; }
+.institutional-department { display: grid; gap: 4px; text-align: right; color: var(--color-brand); }
+.institutional-department strong { font-size: 1rem; }
+.login-layout { display: grid; grid-template-columns: 1.1fr 1fr; align-items: stretch; gap: 0; padding-block: 56px; min-height: 70vh; }
+.login-introduction { padding: 48px; background: var(--color-brand); color: var(--color-on-brand); border-radius: var(--radius-panel) 0 0 var(--radius-panel); border-bottom: 6px solid var(--color-accent-yellow); }
+.eyebrow { display: inline-block; text-transform: uppercase; letter-spacing: .1em; font-size: .75rem; font-weight: 700; padding: 4px 10px; background: var(--color-accent-yellow); color: var(--color-brand); border-radius: var(--radius-control); }
+.login-introduction h1 { color: var(--color-on-brand); font-size: clamp(3rem, 6vw, 4.5rem); font-weight: 700; line-height: 1.1; letter-spacing: -.055em; margin: 24px 0; }
+.login-introduction h1 span, .footer-product span { color: var(--color-accent-yellow); }
+.pinda-login p { margin: 0 0 16px; }
+.login-introduction .introduction { font-size: 1.25rem; margin-bottom: 32px; }
+.pinda-login .login-panel {
+  display: block;
+  grid-area: auto;
+  align-self: stretch;
+  width: auto;
+  max-width: none;
+  margin: 0;
+  padding: 40px;
+  background: var(--color-surface);
+  border-top: 5px solid var(--color-brand-accent);
+  border-radius: 0 var(--radius-panel) var(--radius-panel) 0;
+  box-shadow: var(--shadow-panel);
+  color: var(--color-text-dark);
+  min-width: 0;
+}
+.login-panel .pf-v5-c-login__main-header,
+.login-panel .pf-v5-c-login__main-body,
+.login-panel .pf-v5-c-login__main-footer { padding: 0; margin: 0; }
+.login-panel .pf-v5-c-login__main-header { display: block; border-top: 0; }
+.login-panel #kc-page-title { margin: 0 0 16px; font-size: 1.25rem; line-height: 1.4; font-weight: 700; font-family: inherit; color: var(--color-brand); }
+.login-panel .login-description { margin-bottom: 24px; }
+.login-panel .pf-v5-c-form { --pf-v5-c-form--GridGap: 20px; }
+.login-panel .pf-v5-c-form__label { color: var(--color-text-dark); font-size: .875rem; font-weight: 600; }
+.login-panel .pf-v5-c-form-control {
+  --pf-v5-c-form-control--BorderTopColor: var(--color-control-border);
+  --pf-v5-c-form-control--BorderRightColor: var(--color-control-border);
+  --pf-v5-c-form-control--BorderBottomColor: var(--color-control-border);
+  --pf-v5-c-form-control--BorderLeftColor: var(--color-control-border);
+  --pf-v5-c-form-control--after--BorderBottomWidth: 0;
+  border-radius: var(--radius-control);
+  border: 1px solid var(--color-control-border);
+  background: var(--color-surface);
+}
+.login-panel .pf-v5-c-form-control::before,
+.login-panel .pf-v5-c-form-control::after { border: 0; box-shadow: none; }
+.login-panel .pf-v5-c-form-control:focus-within { border-color: var(--color-brand); outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.login-panel .pf-v5-c-form-control > input { min-height: 48px; padding: 12px; font: inherit; color: var(--color-text-dark); background: transparent; border-radius: inherit; }
+.login-panel .pf-v5-c-form-control > input:focus-visible { outline: none; }
+.login-panel .pf-v5-c-button { font-family: inherit; font-size: 1rem; border-radius: var(--radius-control); min-height: 44px; }
+.login-panel .pf-v5-c-button.pf-m-primary { background: var(--color-action); color: var(--color-on-brand); font-weight: 600; padding: 10px 24px; width: 100%; }
+.login-panel .pf-v5-c-button.pf-m-primary:hover { background: var(--color-action-hover); }
+.login-panel .pf-v5-c-button.pf-m-control { min-height: 48px; color: var(--color-brand); background: var(--color-surface-info); border-radius: 0 var(--radius-control) var(--radius-control) 0; }
+.login-panel .pf-v5-c-button::after { border-radius: inherit; }
+.login-panel .pf-v5-c-button:disabled { opacity: .65; cursor: wait; }
+.login-panel a { color: var(--color-brand); text-underline-offset: 4px; }
+.login-panel .pf-v5-c-helper-text__item.pf-m-error { color: var(--color-secondary-red); background: var(--color-surface-danger); border-left: 4px solid var(--color-secondary-red); border-radius: var(--radius-control); padding: 10px 12px; }
+.login-panel .pf-v5-c-alert { margin-bottom: 20px; border-radius: var(--radius-control); }
+.login-panel .pf-v5-c-alert.pf-m-danger { background: var(--color-surface-danger); }
+.login-panel .pf-v5-c-input-group { align-items: stretch; }
+.login-panel .pf-v5-c-input-group .pf-v5-c-form-control { border-radius: var(--radius-control) 0 0 var(--radius-control); }
+.login-panel .pf-v5-c-input-group .pf-v5-c-form-control::before { border-radius: inherit; }
+.login-help { font-size: .875rem; margin-top: 24px; }
+.login-help p { margin-bottom: 12px; }
+.institutional-footer { margin-top: auto; padding-block: 24px; background: var(--color-brand); color: var(--color-on-brand); border-top: 5px solid var(--color-brand-accent); font-size: .75rem; }
+.footer-content { display: flex; justify-content: space-between; gap: 32px; padding-block: 12px; }
+.footer-product { font-size: 1.5rem; }
+.footer-content p { margin-bottom: 4px; }
+.footer-content > div + div { text-align: right; }
+.repository-link { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-on-brand); text-underline-offset: 4px; }
+.repository-link:hover { color: var(--color-accent-yellow); }
+.skip-link { position: absolute; z-index: 20; left: 24px; top: -100px; padding: 12px; background: var(--color-surface); color: var(--color-brand); }
+.skip-link:focus { top: 12px; }
+.pinda-login :focus-visible { outline: 3px solid var(--color-focus); outline-offset: 4px; }
+.institutional-footer a:focus-visible { outline-color: var(--color-accent-yellow); }
+.pinda-login main:focus { outline: none; }
+@media (max-width: 800px) {
+  .login-layout { grid-template-columns: 1fr; padding-block: 32px; min-height: auto; }
+  .login-introduction { padding: 32px; border-radius: var(--radius-panel) var(--radius-panel) 0 0; }
+  .pinda-login .login-panel { padding: 24px; border-radius: 0 0 var(--radius-panel) var(--radius-panel); }
+  .institutional-department strong, .institutional-ribbon span { display: none; }
+  .institutional-department { text-align: left; }
+  .footer-content { flex-direction: column; gap: 20px; }
+  .footer-content > div + div { text-align: left; }
+}
+@media (max-width: 700px) {
+  .header-content { flex-direction: column; gap: 4px; }
+}
+@media (max-width: 450px) {
+  .institutional-logo { width: 250px; height: 104px; }
+  .institutional-department { font-size: .75rem; padding-bottom: 12px; }
+  .login-introduction { padding: 24px; }
+  .login-introduction h1 { font-size: clamp(2.5rem, 11vw, 3rem); }
+}

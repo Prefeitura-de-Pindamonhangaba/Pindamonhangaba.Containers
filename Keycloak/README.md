@@ -56,6 +56,12 @@ Abra a URL configurada seguida de `/admin/`. A primeira inicializacao prepara a 
 
 Depois do primeiro acesso, crie e valide um administrador permanente antes de desativar o bootstrap. Configure MFA e privilegios conforme a politica da organizacao. Senhas e estado administrativo nao sao versionados.
 
+## Tema institucional
+
+O diretorio `themes` e montado em `/opt/keycloak/themes`. Para ativar, selecione o realm da aplicacao e abra **Realm settings > Themes > Login theme > pindamonhangaba**. O tema usa identidade generica da Prefeitura, sem referencias a um sistema especifico. Consulte [o guia do tema](themes/pindamonhangaba/README.md).
+
+O tema do realm `master` e mantido separadamente. O cache permanece habilitado; ao editar templates ou propriedades, reinicie o Keycloak para recarregar o tema.
+
 ## Rede desta instalacao
 
 Os modelos em `deploy/rede-interna/` preservam o servico systemd e a regra de firewall aplicados neste servidor. Eles sao especificos para `10.0.0.16:8081` e a rede `10.0.0.0/23`; revise-os antes de utilizar em outra rede. O script permite tambem a comunicacao da rede Docker do DadosPinda com o Keycloak. A instalacao manual, como root, usa:

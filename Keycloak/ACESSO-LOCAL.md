@@ -30,3 +30,5 @@ Uma integracao LDAP no realm `master` estava habilitada com `usersDn=systeste`, 
 O administrador de bootstrap `admin` foi desativado depois de validar o administrador permanente. As credenciais de bootstrap do `.env` nao sao as credenciais do novo administrador.
 
 Validacao realizada: saude dos dois containers, certificado/SAN, login OIDC com PKCE do usuario de teste, troca de codigo por tokens, identidade, rejeicao do acesso administrativo e logout. As credenciais do administrador foram validadas e o fluxo apresentou a troca obrigatoria de senha. A validacao HTTP/OIDC foi executada no servidor; o acesso a partir do computador do operador depende da rota de rede e da confianca no certificado.
+
+O tema de login generico `pindamonhangaba` esta ativo no realm de aplicacoes. Mantem brasao, cores e estrutura institucionais, sem referencias ao DadosPinda na tela. As fontes e instrucoes de ativacao estao em `themes/pindamonhangaba/`.
