@@ -1,0 +1,28 @@
+#!/bin/bash
+set -euo pipefail
+rule=(-p tcp ! -s 10.0.0.0/23 -m conntrack --ctdir ORIGINAL --ctorigdst 10.0.0.16 --ctorigdstport 8081 -m comment --comment keycloak-rede-interna -j DROP)
+network_info=$(/usr/bin/docker network inspect pindamonhangabadadospinda_frontend --format '{{.Id}} {{(index .IPAM.Config 0).Subnet}}' 2>/dev/null || true)
+app_rule=()
+if [[ -n "$network_info" ]]; then
+  read -r network_id network_subnet <<< "$network_info"
+  app_rule=(-i "br-${network_id:0:12}" -s "$network_subnet" -p tcp -m conntrack --ctdir ORIGINAL --ctorigdst 10.0.0.16 --ctorigdstport 8081 -m comment --comment dadospinda-keycloak -j ACCEPT)
+fi
+case "${1:-start}" in
+  start)
+    if ! /usr/sbin/iptables -w -C DOCKER-USER "${rule[@]}" 2>/dev/null; then
+      /usr/sbin/iptables -w -I DOCKER-USER 1 "${rule[@]}"
+    fi
+    if [[ ${#app_rule[@]} -gt 0 ]] && ! /usr/sbin/iptables -w -C DOCKER-USER "${app_rule[@]}" 2>/dev/null; then
+      /usr/sbin/iptables -w -I DOCKER-USER 1 "${app_rule[@]}"
+    fi
+    ;;
+  stop)
+    if [[ ${#app_rule[@]} -gt 0 ]] && /usr/sbin/iptables -w -C DOCKER-USER "${app_rule[@]}" 2>/dev/null; then
+      /usr/sbin/iptables -w -D DOCKER-USER "${app_rule[@]}"
+    fi
+    if /usr/sbin/iptables -w -C DOCKER-USER "${rule[@]}" 2>/dev/null; then
+      /usr/sbin/iptables -w -D DOCKER-USER "${rule[@]}"
+    fi
+    ;;
+  *) exit 2 ;;
+esac

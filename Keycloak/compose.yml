@@ -35,10 +35,12 @@ services:
       KC_DB_PASSWORD: ${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD no .env}
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME:-admin}
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD:?Defina KC_BOOTSTRAP_ADMIN_PASSWORD no .env}
-      KC_HOSTNAME: ${KC_HOSTNAME:-http://localhost:8080}
+      KC_HOSTNAME: ${KC_HOSTNAME:-https://localhost:8081}
       KC_HOSTNAME_STRICT: 'true'
       KC_HTTP_ENABLED: 'true'
-      KC_PROXY_HEADERS: ${KC_PROXY_HEADERS:-}
+      KC_HTTPS_CERTIFICATE_FILE: /opt/keycloak/conf/tls/server.crt
+      KC_HTTPS_CERTIFICATE_KEY_FILE: /opt/keycloak/conf/tls/server.key
+      KC_HTTP_MANAGEMENT_SCHEME: http
       KC_HEALTH_ENABLED: 'true'
       KC_METRICS_ENABLED: 'true'
       KC_CACHE: local
@@ -46,7 +48,9 @@ services:
       KC_DB_POOL_MIN_SIZE: '5'
       KC_DB_POOL_MAX_SIZE: '20'
     ports:
-      - '127.0.0.1:${KC_HTTP_PORT:-8080}:8080'
+      - '${KC_BIND_ADDRESS:-127.0.0.1}:${KC_HTTP_PORT:-8081}:8443'
+    volumes:
+      - ./tls:/opt/keycloak/conf/tls:ro,Z
     networks:
       - database
       - frontend

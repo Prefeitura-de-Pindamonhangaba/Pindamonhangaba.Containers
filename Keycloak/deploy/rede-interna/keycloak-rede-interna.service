@@ -1,0 +1,14 @@
+[Unit]
+Description=Restringe o Keycloak a rede interna 10.0.0.0/23
+Requires=docker.service
+After=docker.service
+PartOf=docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/sbin/keycloak-rede-interna start
+ExecStop=/usr/local/sbin/keycloak-rede-interna stop
+
+[Install]
+WantedBy=docker.service

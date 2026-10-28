@@ -1,62 +1,71 @@
-# Keycloak com PostgreSQL
+# Keycloak com PostgreSQL e HTTPS
 
-Stack de uma instancia, com Keycloak 26.8.1 e PostgreSQL 17. Requer Docker Engine/Docker Desktop em modo Linux e Docker Compose v2. Reserve inicialmente cerca de 2 GB de RAM para a stack e acompanhe o consumo conforme a carga.
+Stack de uma instancia, com Keycloak 26.8.1, PostgreSQL 17, HTTPS nativo e tema institucional generico. Requer Docker Engine em Linux e Docker Compose. O banco usa volume persistente e nao publica porta no host.
+
+## Preparar
+
+```sh
+cp .env.example .env
+chmod 600 .env
+```
+
+Preencha `POSTGRES_PASSWORD` e `KC_BOOTSTRAP_ADMIN_PASSWORD` com senhas diferentes e aleatorias. O administrador de bootstrap so e criado na inicializacao de um banco novo; alterar o `.env` nao redefine senhas existentes.
+
+Configure `KC_HOSTNAME` com a URL HTTPS exata usada no navegador, incluindo a porta. `KC_BIND_ADDRESS` define o IP de publicacao e usa `127.0.0.1` por padrao. Para acesso pela rede municipal desta instalacao:
+
+```env
+KC_HOSTNAME=https://10.0.0.16:8081
+KC_BIND_ADDRESS=10.0.0.16
+KC_HTTP_PORT=8081
+```
+
+`KC_HTTP_PORT` e o nome historico da porta externa; agora publica HTTPS/8443. HTTP/8080 e a verificacao de saude HTTP/9000 permanecem internos.
+
+## Certificado TLS
+
+Coloque o certificado em `tls/server.crt` e a chave privada correspondente em `tls/server.key`. Use um certificado com SAN correspondente ao IP ou dominio configurado. Os arquivos sao ignorados pelo Git e montados somente para leitura. Em Linux, permita leitura pelo UID 1000 do Keycloak:
+
+```sh
+chown -R 1000:0 tls
+chmod 750 tls
+chmod 640 tls/server.key
+chmod 644 tls/server.crt
+```
+
+Prefira certificado emitido pela autoridade interna da organizacao. Para homologacao local em localhost, um certificado autoassinado pode ser criado com:
+
+```sh
+mkdir -p tls
+openssl req -x509 -newkey rsa:3072 -sha256 -nodes -days 365 \
+  -keyout tls/server.key -out tls/server.crt \
+  -subj '/CN=localhost' \
+  -addext 'subjectAltName=DNS:localhost,IP:127.0.0.1'
+```
+
+Ao utilizar IP de rede, adapte o SAN e o CN para esse IP. Distribua apenas o certificado publico aos computadores autorizados e configure a confianca no navegador. Nunca compartilhe a chave privada. O arquivo [ACESSO-LOCAL.md](ACESSO-LOCAL.md) documenta a instalacao da Prefeitura.
 
 ## Iniciar
 
-Coloque compose.yml e .env.example na mesma pasta. No terminal dessa pasta:
-
-```powershell
-Copy-Item .env.example .env
-```
-
-No Linux/macOS, use `cp .env.example .env`.
-
-Edite `.env` e preencha POSTGRES_PASSWORD e KC_BOOTSTRAP_ADMIN_PASSWORD com senhas diferentes e aleatorias. Exemplo para gerar uma senha de 64 caracteres no PowerShell (execute novamente para a outra senha):
-
-```powershell
-$bytes = New-Object byte[] 32
-$rng = [System.Security.Cryptography.RandomNumberGenerator]::Create()
-$rng.GetBytes($bytes)
-$rng.Dispose()
-[BitConverter]::ToString($bytes).Replace('-', '').ToLowerInvariant()
-```
-
-No Linux/macOS com OpenSSL: `openssl rand -hex 32`.
-
-Proteja o arquivo `.env` com permissoes de leitura apenas para operadores autorizados. No Linux/macOS: `chmod 600 .env`. Nao o versione nem compartilhe a saida de `docker compose config`, que pode conter senhas. Operadores com acesso ao Docker conseguem inspecionar as variaveis dos containers.
-
 ```sh
 docker compose config --quiet
-docker compose up -d
+docker compose up -d --wait --wait-timeout 300
 docker compose ps
-docker compose logs -f keycloak
 ```
 
-A primeira inicializacao pode demorar alguns minutos: `start` prepara a distribuicao automaticamente. Aguarde os dois servicos ficarem `healthy`. Abra http://localhost:8080/admin e use as credenciais do `.env`. Para aguardar a prontidao no terminal, use `docker compose up -d --wait --wait-timeout 300`.
+Abra a URL configurada seguida de `/admin/`. A primeira inicializacao prepara a distribuicao e pode demorar alguns minutos. Nao compartilhe a saida de `docker compose config` sem `--quiet`, pois pode conter senhas.
 
-O administrador de bootstrap e temporario. Crie um administrador permanente no realm master com as permissoes administrativas necessarias, configure MFA, valide o acesso e exclua o temporario. As variaveis de bootstrap so criam a conta na inicializacao de um banco novo; alterar sua senha no `.env` nao redefine uma conta existente. Depois disso, substitua a senha de bootstrap por um novo valor aleatorio e recrie o container para retirar o segredo inicial de seu ambiente.
+Depois do primeiro acesso, crie e valide um administrador permanente antes de desativar o bootstrap. Configure MFA e privilegios conforme a politica da organizacao. Senhas e estado administrativo nao sao versionados.
 
-## O que esta configurado
+## Rede desta instalacao
 
-- PostgreSQL persistente em volume, sem porta publicada e em rede interna.
-- Keycloak no modo `start`, hostname explicito e acesso publicado somente em 127.0.0.1.
-- Verificacao do banco antes de iniciar Keycloak; prontidao pela porta interna 9000, que nao e publicada. Metricas habilitadas para incluir o estado do pool do banco.
-- Reinicio apos encerramento inesperado. O estado `unhealthy` por si so nao reinicia um container.
-- Cache local para uma unica instancia. Nao escale este arquivo para varias replicas sem configurar cluster.
+Os modelos em `deploy/rede-interna/` preservam o servico systemd e a regra de firewall aplicados neste servidor. Eles sao especificos para `10.0.0.16:8081` e a rede `10.0.0.0/23`; revise-os antes de utilizar em outra rede. O script permite tambem a comunicacao da rede Docker do DadosPinda com o Keycloak. A instalacao manual, como root, usa:
 
-O usuario POSTGRES_USER e o administrador do banco criado pela imagem PostgreSQL. Para este deploy simplificado ele e exclusivo do Keycloak; nao compartilhe esse banco com outras aplicacoes. Ambientes com separacao de privilegios devem provisionar um usuario de aplicacao separado, com permissoes para migrar o schema do Keycloak.
-
-## Publicar com HTTPS
-
-O padrao HTTP e restrito ao computador local. Para acesso remoto, use um dominio e um proxy reverso com certificado TLS valido no mesmo host (por exemplo Nginx ou Caddy). O proxy e o certificado precisam ser provisionados separadamente.
-
-1. Configure DNS e HTTPS no proxy para seu dominio.
-2. No `.env`, defina `KC_HOSTNAME=https://login.seudominio.com` e `KC_PROXY_HEADERS=xforwarded`.
-3. Encaminhe o proxy para `http://127.0.0.1:8080`. Ele deve sobrescrever X-Forwarded-For, X-Forwarded-Proto e X-Forwarded-Host com os valores corretos. Nao aceite esses cabecalhos diretamente do cliente.
-4. Execute `docker compose up -d` e teste login e redirecionamentos pela URL HTTPS.
-
-Mantenha a publicacao em 127.0.0.1 e a porta 9000 fechada. Se o proxy estiver em outro container, 127.0.0.1 apontara para o proprio proxy: conecte-o a rede frontend e use `http://keycloak:8080`, restringindo quais containers podem participar dessa rede. Nao exponha 8080 diretamente na Internet. Restrinja o acesso administrativo no proxy/firewall, configure MFA e ajuste os realms para exigir SSL em acessos externos. Esta stack nao oferece alta disponibilidade.
+```sh
+install -m 755 deploy/rede-interna/keycloak-rede-interna /usr/local/sbin/
+install -m 644 deploy/rede-interna/keycloak-rede-interna.service /etc/systemd/system/
+systemctl daemon-reload
+systemctl enable --now keycloak-rede-interna.service
+```
 
 ## Operacao e dados
 
