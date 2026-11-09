@@ -1,0 +1,26 @@
+# Usar junto ao compose.yml original, preservado sem alteracoes.
+name: keycloak-production
+services:
+  postgres:
+    profiles: [local-database]
+  keycloak:
+    depends_on: !reset {}
+    cpus: 1.0
+    mem_limit: 900m
+    environment:
+      KC_DB_URL: ${KC_DB_URL:?Defina a conexao JDBC externa}
+      KC_DB_USERNAME: ${KC_DB_USERNAME:?Defina o usuario do banco externo}
+      KC_DB_PASSWORD: ${KC_DB_PASSWORD:?Defina a senha do banco externo}
+      KC_PROXY_HEADERS: xforwarded
+      KC_PROXY_TRUSTED_ADDRESSES: ${KC_PROXY_TRUSTED_ADDRESSES:?Defina o IP do proxy}
+      KC_DB_POOL_INITIAL_SIZE: '1'
+      KC_DB_POOL_MIN_SIZE: '1'
+      KC_DB_POOL_MAX_SIZE: '10'
+      JAVA_OPTS_KC_HEAP: -Xms128m -Xmx512m
+    volumes:
+      - ./certificates:/certificates:ro,z
+    networks: !override [proxy]
+networks:
+  proxy:
+    external: true
+    name: ${PROXY_NETWORK:-nginx-proxy-manager_default}
