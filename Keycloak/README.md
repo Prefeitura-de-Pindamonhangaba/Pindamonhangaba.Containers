@@ -2,6 +2,8 @@
 
 Stack de uma instancia, com Keycloak 26.8.1, PostgreSQL 17, HTTPS nativo e tema institucional generico. Requer Docker Engine em Linux e Docker Compose. O banco usa volume persistente e nao publica porta no host.
 
+Para produção com PostgreSQL externo, consulte [PRODUCAO.md](PRODUCAO.md) e utilize a sobreposição versionada junto deste Compose original.
+
 ## Preparar
 
 ```sh
