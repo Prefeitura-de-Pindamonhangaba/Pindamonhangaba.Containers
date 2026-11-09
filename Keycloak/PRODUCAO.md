@@ -12,11 +12,15 @@ docker compose -p keycloak-production -f compose.yml -f compose.production.yml u
 
 Prepare `tls/server.crt` e `tls/server.key` conforme o README original. O certificado deve incluir `10.0.0.193` no SAN. Em `certificates/postgres-root.crt`, instale apenas a CA publica do PostgreSQL. Nunca copie a chave privada do banco. A conexao JDBC usa `sslmode=verify-full`.
 
-O nome do projeto permanece `keycloak-production` para substituir a instancia existente sem criar um segundo Keycloak conectado ao mesmo banco. A porta externa 8082 encaminha para HTTPS/8443. A administracao abre em `https://10.0.0.193:8082/admin/`, conforme `KC_HOSTNAME`. Nao ha `KC_HOSTNAME_ADMIN` separado nesta configuracao.
+O nome do projeto permanece `keycloak-production` para substituir a instancia existente sem criar um segundo Keycloak conectado ao mesmo banco. A porta externa 8082 encaminha para HTTPS/8443. A administracao abre em `https://sso.pindamonhangaba.sp.gov.br/admin/`, conforme `KC_HOSTNAME`. Nao ha `KC_HOSTNAME_ADMIN` separado nesta configuracao. O IP e a porta sao o destino do proxy; os redirecionamentos de login utilizam o dominio publico.
 
-Para preservar o SSO publico do DSI Panel, configure a URL de frontend do realm `pindamonhangaba` como `https://sso.pindamonhangaba.sp.gov.br`. O realm `master` usa a URL canonica por IP e nao precisa de URL de frontend especial. O issuer institucional continua `https://sso.pindamonhangaba.sp.gov.br/realms/pindamonhangaba`; o banco e os identificadores dos usuarios permanecem os mesmos. O dominio publico ainda precisa de DNS e HTTPS no proxy para o login das aplicacoes.
+Para preservar o SSO publico do DSI Panel, a URL de frontend do realm `pindamonhangaba` permanece `https://sso.pindamonhangaba.sp.gov.br`. O realm `master` herda o hostname publico e nao precisa de URL de frontend especial. O issuer institucional continua `https://sso.pindamonhangaba.sp.gov.br/realms/pindamonhangaba`; o banco e os identificadores dos usuarios permanecem os mesmos.
+
+Antes do DNS publico, `KC_HOSTNAME` pode usar o IP HTTPS de rede. Assim que o dominio estiver ativo, ajuste-o para a URL publica: o Keycloak usa esse valor para os redirecionamentos. Alterar apenas a regra do proxy nao substitui o hostname canonico.
 
 O Nginx Proxy Manager existente encaminha por HTTPS para `10.0.0.193:8082`. Configure-o para confiar na CA do certificado desse upstream e verificar o nome contido no certificado. `KC_PROXY_TRUSTED_ADDRESSES` deve corresponder ao IP real do proxy, nao a qualquer origem.
+
+O proxy publica um certificado valido de `sso.pindamonhangaba.sp.gov.br` em 443. Quando houver Cloudflare, configure SSL Strict/Full (strict) apenas para esse hostname por uma regra de configuracao, preservando as configuracoes dos outros sistemas da zona. Valide o protocolo observado na origem, alem do certificado exibido ao visitante.
 
 A imagem e a configuracao principal seguem o Compose original. A sobreposicao limita recursos e reduz o pool para o servidor municipal de pouca memoria. Use `docker compose config --services` sem habilitar perfis para conferir que apenas `keycloak` sera iniciado; o perfil `local-database` nao e usado nesta producao.
 
