@@ -1,0 +1,34 @@
+[server]
+hostname = "$env{APIM_HOSTNAME}"
+base_path = "${carbon.protocol}://${carbon.host}:${carbon.management.port}"
+
+[super_admin]
+username = "admin"
+password = "$env{APIM_ADMIN_PASSWORD}"
+create_admin_account = true
+
+[user_store]
+type = "database_unique_id"
+
+[database.apim_db]
+type = "postgre"
+url = "$env{APIM_DB_URL}"
+username = "$env{APIM_DB_USER}"
+password = "$env{APIM_DB_PASSWORD}"
+driver = "org.postgresql.Driver"
+
+[database.shared_db]
+type = "postgre"
+url = "$env{SHARED_DB_URL}"
+username = "$env{SHARED_DB_USER}"
+password = "$env{SHARED_DB_PASSWORD}"
+driver = "org.postgresql.Driver"
+
+[[apim.gateway.environment]]
+name = "Default"
+type = "hybrid"
+display_in_api_console = true
+service_url = "https://localhost:9443/services/"
+username = "${admin.username}"
+password = "${admin.password}"
+https_endpoint = "https://$env{APIM_HOSTNAME}:8243"

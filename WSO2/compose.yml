@@ -1,0 +1,57 @@
+name: wso2
+
+services:
+  gateway-init:
+    build: ./init
+    environment:
+      WSO2_TLS_SAN: ${WSO2_TLS_SAN:-DNS:localhost,IP:127.0.0.1}
+    restart: "no"
+    volumes:
+      - listener_certs:/certs
+      - encryption_keys:/keys
+
+  gateway-controller:
+    image: ghcr.io/wso2/api-platform/gateway-controller:1.2.0
+    command: ["-config", "/etc/gateway-controller/config.toml"]
+    restart: unless-stopped
+    depends_on:
+      gateway-init:
+        condition: service_completed_successfully
+    environment:
+      APIP_GW_CONTROLLER_STORAGE_TYPE: ${WSO2_STORAGE_TYPE:-sqlite}
+      APIP_GW_CONTROLLER_STORAGE_POSTGRES_HOST: ${WSO2_POSTGRES_HOST:-}
+      APIP_GW_CONTROLLER_STORAGE_POSTGRES_PORT: ${WSO2_POSTGRES_PORT:-5432}
+      APIP_GW_CONTROLLER_STORAGE_POSTGRES_DATABASE: ${WSO2_POSTGRES_DATABASE:-gateway_controller}
+      APIP_GW_CONTROLLER_STORAGE_POSTGRES_USER: ${WSO2_POSTGRES_USER:-gateway}
+      APIP_GW_CONTROLLER_STORAGE_POSTGRES_PASSWORD: ${WSO2_POSTGRES_PASSWORD:-}
+      APIP_GW_CONTROLLER_STORAGE_POSTGRES_SSLMODE: ${WSO2_POSTGRES_SSLMODE:-verify-full}
+      APIP_GW_CONTROLLER_CONTROLPLANE_HOST: ${WSO2_CONTROLPLANE_HOST:-connect.bijira.dev}
+      APIP_GW_CONTROLLER_CONTROLPLANE_TOKEN: ${WSO2_CONTROLPLANE_TOKEN:?Defina WSO2_CONTROLPLANE_TOKEN no .env}
+      APIP_GW_CONTROLLER_AUTH_BASIC_ADMIN_PASSWORD_HASH: ${WSO2_ADMIN_PASSWORD_HASH:?Defina WSO2_ADMIN_PASSWORD_HASH no .env}
+    ports:
+      - "127.0.0.1:${WSO2_ADMIN_PORT:-9094}:9092"
+    volumes:
+      - controller_data:/app/data
+      - encryption_keys:/app/data/aesgcm-keys:ro
+      - listener_certs:/app/listener-certs:ro
+      - ./config.toml:/etc/gateway-controller/config.toml:ro
+
+  gateway-runtime:
+    image: ghcr.io/wso2/api-platform/gateway-runtime:1.2.0
+    command: ["--pol.config", "/etc/policy-engine/config.toml"]
+    restart: unless-stopped
+    depends_on:
+      - gateway-controller
+    environment:
+      GATEWAY_CONTROLLER_HOST: gateway-controller
+      LOG_LEVEL: info
+    ports:
+      - "${WSO2_BIND_ADDRESS:-127.0.0.1}:${WSO2_HTTP_PORT:-8081}:8080"
+      - "${WSO2_BIND_ADDRESS:-127.0.0.1}:${WSO2_HTTPS_PORT:-8443}:8443"
+    volumes:
+      - ./config.toml:/etc/policy-engine/config.toml:ro
+
+volumes:
+  controller_data:
+  listener_certs:
+  encryption_keys:

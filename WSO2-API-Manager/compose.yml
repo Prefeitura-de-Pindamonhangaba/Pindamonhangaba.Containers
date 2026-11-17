@@ -1,0 +1,22 @@
+name: wso2-api-manager
+
+services:
+  api-manager:
+    build: .
+    restart: unless-stopped
+    environment:
+      JVM_MEM_OPTS: "${APIM_JVM_MEM_OPTS:--Xms256m -Xmx512m}"
+      APIM_HOSTNAME: ${APIM_HOSTNAME:?Defina APIM_HOSTNAME}
+      APIM_ADMIN_PASSWORD: ${APIM_ADMIN_PASSWORD:?Defina APIM_ADMIN_PASSWORD}
+      APIM_DB_URL: ${APIM_DB_URL:?Defina APIM_DB_URL}
+      APIM_DB_USER: ${APIM_DB_USER:?Defina APIM_DB_USER}
+      APIM_DB_PASSWORD: ${APIM_DB_PASSWORD:?Defina APIM_DB_PASSWORD}
+      SHARED_DB_URL: ${SHARED_DB_URL:?Defina SHARED_DB_URL}
+      SHARED_DB_USER: ${SHARED_DB_USER:?Defina SHARED_DB_USER}
+      SHARED_DB_PASSWORD: ${SHARED_DB_PASSWORD:?Defina SHARED_DB_PASSWORD}
+    ports:
+      - "${APIM_BIND_ADDRESS:-127.0.0.1}:9443:9443"
+      - "${APIM_BIND_ADDRESS:-127.0.0.1}:8243:8243"
+    volumes:
+      - ./deployment.toml:/home/wso2carbon/wso2-config-volume/repository/conf/deployment.toml:ro
+      - ./postgres-ca.crt:/etc/wso2/postgres-ca.crt:ro
